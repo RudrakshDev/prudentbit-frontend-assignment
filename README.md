@@ -1,4 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Patient Directory Application
+
+This is a [Next.js](https://nextjs.org) project that displays a patient directory with both table and card views. The application includes features such as search, filtering, sorting, and pagination.
+
+## Features
+
+- **Dual View Options**: Toggle between table and card views
+- **Search Functionality**: Search patients by name, medical issue, or contact information
+- **Filtering**: Filter patients by medical issue and age range
+- **Sorting**: Sort patients by different fields (name, age, etc.)
+- **Pagination**: Navigate through pages of patient data
+- **Responsive Design**: Works on various screen sizes
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS
+- **State Management**: React Hooks
+
+## Project Structure
+
+```
+/src
+  /app
+    /api
+      /patients
+        route.ts       # API endpoint for patient data
+    layout.tsx        # Root layout component
+    page.tsx          # Main page component
+  /components
+    CardView.tsx      # Card view component
+    Header.tsx        # Header component
+    Pagination.tsx    # Pagination component
+    SearchBar.tsx     # Search and filter component
+    TableView.tsx     # Table view component
+  /types
+    index.ts          # TypeScript interfaces
+/public
+  data.json           # Patient data
+```
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+```
+
+## Install the dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
 ## Getting Started
 
@@ -8,29 +64,53 @@ First, run the development server:
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architectural Decisions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### API Implementation
 
-## Learn More
+The application uses Next.js Route Handlers to create a local API endpoint that serves patient data from a JSON file. This approach allows for:
 
-To learn more about Next.js, take a look at the following resources:
+- Server-side data processing
+- Pagination, filtering, and sorting on the server
+- Reduced client-side data processing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### State Management
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+React's built-in useState and useEffect hooks are used for state management. This approach is sufficient for this application's complexity level and avoids unnecessary dependencies.
 
-## Deploy on Vercel
+### Component Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application follows a component-based architecture with clear separation of concerns:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Page Component**: Manages overall state and data fetching
+- **View Components**: Handle different display modes (table/card)
+- **Utility Components**: Provide reusable functionality (search, pagination)
+
+### TypeScript Integration
+
+TypeScript interfaces are used throughout the application to ensure type safety and improve developer experience. Key interfaces include:
+
+- Patient data structure
+- API response format
+- Filter and pagination parameters
+
+## Performance Considerations
+
+- **Debounced Search**: Prevents excessive API calls during typing
+- **Pagination**: Limits the amount of data loaded at once
+- **Server-side Filtering**: Reduces data transfer and client-side processing
+- **Memoization**: Used where appropriate to prevent unnecessary re-renders
+
+## Submission Details
+
+This project was completed as part of the **Frontend Developer Assessment** for **PRUDENTBIT**.
+
+### Candidate Information
+- **Name**: Rudraksh Jhaveri  
+- **Role Applied For**: Frontend Developer  
+- **Email**: rudrakshjhaveri28@gmail.com  
+- **GitHub**: [RudrakshDev](https://github.com/RudrakshDev)

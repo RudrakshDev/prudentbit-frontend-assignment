@@ -1,103 +1,163 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
+import SearchBar from '@/components/SearchBar';
+import TableView from '@/components/TableView';
+import CardView from '@/components/CardView';
+import Pagination from '@/components/Pagination';
+import { Patient, FilterParams, ApiResponse } from '@/types';
 
 export default function Home() {
+  // State for view mode
+  const [activeView, setActiveView] = useState<'table' | 'card'>('table');
+  
+  // State for patients data
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [limit] = useState(10);
+  
+  // State for filters
+  const [filters, setFilters] = useState<FilterParams>({
+    search: '',
+    medicalIssue: '',
+    minAge: undefined,
+    maxAge: undefined,
+    sortBy: 'patient_id',
+    sortOrder: 'asc'
+  });
+  
+  // Count active filters
+  const countActiveFilters = () => {
+    return Object.entries(filters).filter(([key, value]) => {
+      if (key === 'sortBy' && value === 'patient_id') return false;
+      if (key === 'sortOrder' && value === 'asc') return false;
+      return value !== undefined && value !== '';
+    }).length;
+  };
+  
+  // Fetch patients data
+  const fetchPatients = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Build query string from filters
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', currentPage.toString());
+      queryParams.append('limit', limit.toString());
+      
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.medicalIssue) queryParams.append('medicalIssue', filters.medicalIssue);
+      if (filters.minAge !== undefined) queryParams.append('minAge', filters.minAge.toString());
+      if (filters.maxAge !== undefined) queryParams.append('maxAge', filters.maxAge.toString());
+      if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+      if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
+      
+      const queryString = queryParams.toString();
+      console.log('Fetching patients with query:', queryString);
+      
+      const response = await fetch(`/api/patients?${queryString}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data: ApiResponse = await response.json();
+      console.log('API Response:', data);
+      
+      if (data && data.patients) {
+        setPatients(data.patients);
+        setTotalPages(data.pagination.totalPages);
+        setTotalPatients(data.pagination.total);
+      } else {
+        console.error('Invalid API response format:', data);
+        setError('Received invalid data format from server');
+      }
+    } catch (err) {
+      setError('Failed to fetch patients data. Please try again.');
+      console.error('Error fetching patients:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch data when filters or pagination changes
+  useEffect(() => {
+    fetchPatients();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, JSON.stringify(filters)]);
+  
+  // Handle search
+  const handleSearch = (search: string) => {
+    setFilters(prev => ({ ...prev, search }));
+    setCurrentPage(1); // Reset to first page on new search
+  };
+  
+  // Handle filter changes
+  const handleFilter = (newFilters: Partial<FilterParams>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setCurrentPage(1); // Reset to first page on new filter
+  };
+  
+  // Handle clearing a filter
+  const handleClearFilter = (filterName: string) => {
+    setFilters(prev => {
+      const newFilters = { ...prev };
+      // @ts-ignore
+      newFilters[filterName] = filterName === 'sortBy' ? 'patient_id' : 
+                              filterName === 'sortOrder' ? 'asc' : '';
+      return newFilters;
+    });
+    setCurrentPage(1); // Reset to first page on filter clear
+  };
+  
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="min-h-screen bg-gray-100">
+      <Header 
+        activeView={activeView} 
+        setActiveView={setActiveView} 
+        totalPatients={totalPatients}
+        activeFilters={countActiveFilters()}
+      />
+      
+      <div className="container mx-auto px-4 py-6">
+        <SearchBar 
+          onSearch={handleSearch} 
+          onFilter={handleFilter} 
+          onClearFilter={handleClearFilter}
+          activeFilters={filters}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        
+        {activeView === 'table' ? (
+          <TableView patients={patients} isLoading={isLoading} />
+        ) : (
+          <CardView patients={patients} isLoading={isLoading} />
+        )}
+        
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={handlePageChange} 
+        />
+      </div>
     </div>
   );
 }
