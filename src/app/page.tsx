@@ -7,6 +7,7 @@ import TableView from '@/components/TableView';
 import CardView from '@/components/CardView';
 import Pagination from '@/components/Pagination';
 import { Patient, FilterParams, ApiResponse } from '@/types';
+import { Analytics } from "@vercel/analytics/next"
 
 export default function Home() {
   // State for view mode
@@ -157,6 +158,9 @@ export default function Home() {
           totalPages={totalPages} 
           onPageChange={handlePageChange} 
         />
+
+      <Analytics />
+        
       </div>
     </div>
   );
