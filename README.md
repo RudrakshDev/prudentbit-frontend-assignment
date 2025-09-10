@@ -2,6 +2,8 @@
 
 This is a [Next.js](https://nextjs.org) project that displays a patient directory with both table and card views. The application includes features such as search, filtering, sorting, and pagination.
 
+🔗 **Live Demo**: [View on Vercel](https://prudentbit-frontend-assignment.vercel.app/)
+
 ## Features
 
 - **Dual View Options**: Toggle between table and card views
@@ -67,6 +69,17 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Screenshots
+
+### Table View
+![Table View](public/screenshots/table.png)
+
+### Card View
+![Card View](public/screenshots/card.png)
+
+### API Endpoint (/api/patients)
+![API Patients JSON](public/screenshots/api.png)
 
 ## Architectural Decisions
 
