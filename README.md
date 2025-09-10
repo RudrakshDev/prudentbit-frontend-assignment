@@ -76,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ![Table View](public/screenshots/table.png)
 
 ### Card View
-![Card View](public/screenshots/card.png)
+![Card View](public/screenshots/user.png)
 
 ### API Endpoint (/api/patients)
 ![API Patients JSON](public/screenshots/api.png)
